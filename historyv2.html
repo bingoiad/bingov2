@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BinGo - History Analytics</title>
+    <!-- Firebase SDK - Para integração com a base de dados -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Chart.js - Biblioteca para renderização de gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Bibliotecas para exportação de dados -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- Fontes e Ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Variáveis CSS para cores temáticas */
+        :root {
+            --primary: #2e7d32;    /* Verde principal */
+            --secondary: #388e3c;  /* Verde secundário */
+            --accent: #7cb342;     /* Destaque em verde claro */
+            --light: #f1f8e9;      /* Fundo claro */
+            --text: #2e3a3d;       /* Cor do texto principal */
+            --chart-font: 'Nunito', sans-serif; /* Fonte específica para gráficos */
+            --plastic: #FFD700;     /* Yellow for plastic */
+            --cardboard: #2196F3;    /* Blue for cardboard */
+            --glass: #4CAF50;        /* Green for glass */
+        }
+        
+        /* Estilos gerais do corpo da página */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+            padding: 2rem;
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        /* Container principal que centraliza o conteúdo */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        /* Estilo do título principal */
+        h1 {
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Cartão que contém cada gráfico */
+        .graph-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            transition: transform 0.3s;
+            border-left: 4px solid var(--accent);
+        }
+        
+        /* Efeito hover nos cartões */
+        .graph-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        /* Container dos controles (filtros e botões de exportação) */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+        
+        /* Seletor de intervalo de tempo */
+        .time-selector {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        /* Botões do seletor de tempo */
+        .time-btn {
+            background: var(--light);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        /* Estilo do botão ativo */
+        .time-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Container dos botões de exportação */
+        .export-options {
+            display: flex;
+            gap: 0.75rem;
+            margin-left: auto;
+        }
+        
+        /* Botões de exportação */
+        .export-btn {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        /* Efeito hover nos botões de exportação */
+        .export-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Link para voltar ao dashboard */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        /* Efeito hover no link de voltar */
+        .back-link:hover {
+            color: var(--secondary);
+        }
+        
+        /* Estilo dos canvases dos gráficos */
+        canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+        
+        /* Tooltip personalizado */
+        #custom-tooltip {
+            position: absolute;
+            background: white;
+            border: 1px solid #2e7d32;
+            border-radius: 8px;
+            padding: 8px 12px 12px 12px;
+            pointer-events: none;
+            display: none;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            font-family: 'Nunito';
+            z-index: 100;
+        }
+        
+        /* Botão para fechar o tooltip */
+        #close-tooltip {
+            pointer-events: auto;
+            background: none;
+            border: none;
+            color: #2e7d32;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 5px;
+        }
+        
+        /* Type badges in charts */
+        .type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+        
+        .type-plastic {
+            background-color: rgba(255, 215, 0, 0.15);
+            color: #B8860B;
+        }
+        
+        .type-cardboard {
+            background-color: rgba(33, 150, 243, 0.15);
+            color: #1565C0;
+        }
+        
+        .type-glass {
+            background-color: rgba(76, 175, 80, 0.15);
+            color: #2E7D32;
+        }
+        
+        /* Media queries para responsividade */
+        @media (max-width: 768px) {
+            body {
+                padding: 1.25rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .export-options {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .export-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Link para voltar ao dashboard -->
+        <a href="index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+
+        <!-- Título principal da página -->
+        <h1><i class="fas fa-chart-line"></i> Trash Level Analytics</h1>
+        
+        <!-- Controles para filtrar e exportar dados -->
+        <div class="controls">
+            <!-- Seletor de intervalo de tempo -->
+            <div class="time-selector">
+                <button class="time-btn active" data-hours="24">
+                    <i class="fas fa-clock"></i> 24 Hours
+                </button>
+                <button class="time-btn" data-hours="168">
+                    <i class="fas fa-calendar-week"></i> 7 Days
+                </button>
+            </div>
+            
+            <!-- Botões de exportação -->
+            <div class="export-options">
+                <button class="export-btn" id="exportExcel">
+                    <i class="fas fa-file-excel"></i> Excel
+                </button>
+                <button class="export-btn" id="exportPDF">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Gráficos para todas as lixeiras -->
+        <div id="charts-container">
+            <!-- Os gráficos serão gerados dinamicamente aqui -->
+        </div>
+    </div>
+
+    <!-- Tooltip personalizado que aparece ao clicar no gráfico -->
+    <div id="custom-tooltip">
+        <div style="text-align: right; margin-bottom: 5px;">
+            <button id="close-tooltip">✕</button>
+        </div>
+        <div id="tooltip-content"></div>
+    </div>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4SndxF5ZZcZHUj6m1TXghyNRh2uN7AkU",
+            authDomain: "bingo-b9b42.firebaseapp.com",
+            projectId: "bingo-b9b42",
+            storageBucket: "bingo-b9b42.appspot.com",
+            messagingSenderId: "588496760146",
+            appId: "1:588496760146:web:1a3751363269ce12b5de8b"
+        };
+        
+        // Inicialização do Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Instâncias dos gráficos
+        let charts = {};
+        
+        // Rastreadores de estabilidade dos valores para todas as lixeiras
+        let stabilityTrackers = {};
+        let binTypes = {}; // Para armazenar os tipos das lixeiras
+
+        // Inicialização quando a página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeData();
+            
+            // Event listeners para os botões de intervalo de tempo
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    loadData(parseInt(btn.dataset.hours));
+                });
+            });
+            
+            // Event listeners para os botões de exportação
+            document.getElementById('exportExcel').addEventListener('click', exportToExcel);
+            document.getElementById('exportPDF').addEventListener('click', exportToPDF);
+            
+            // Event listener para o botão de fechar o tooltip
+            document.getElementById('close-tooltip').addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('custom-tooltip').style.display = 'none';
+            });
+        });
+
+        /**
+         * Inicializa os dados e configura a verificação de estabilidade
+         */
+        async function initializeData() {
+            // Carregar informações das lixeiras
+            await loadBinInfo();
+            
+            // Inicializa o localStorage se necessário
+            if (!localStorage.getItem('binHistory_initialized')) {
+                Object.keys(stabilityTrackers).forEach(binId => {
+                    localStorage.setItem(`binHistory_${binId}`, JSON.stringify([]));
+                });
+                localStorage.setItem('binHistory_initialized', 'true');
+            }
+            
+            // Carregamento inicial dos dados
+            await loadData(24);
+            
+            // Configura a verificação de estabilidade (executa a cada segundo)
+            setInterval(checkValueStability, 1000);
+        }
+
+        /**
+         * Carrega informações das lixeiras do Firebase
+         */
+        async function loadBinInfo() {
+            try {
+                const snapshot = await db.collection("trash_bins").get();
+                stabilityTrackers = {};
+                binTypes = {};
+                
+                snapshot.forEach(doc => {
+                    const binId = doc.id;
+                    const binData = doc.data();
+                    
+                    // Inicializar tracker para esta lixeira
+                    stabilityTrackers[binId] = {
+                        currentValue: null,
+                        firstDetected: null,
+                        lastStoredValue: null
+                    };
+                    
+                    // Armazenar tipo da lixeira
+                    binTypes[binId] = binData.type || 'unknown';
+                    
+                    // Inicializar histórico no localStorage se não existir
+                    if (!localStorage.getItem(`binHistory_${binId}`)) {
+                        localStorage.setItem(`binHistory_${binId}`, JSON.stringify([]));
+                    }
+                });
+                
+            } catch (error) {
+                console.error("Erro ao carregar informações das lixeiras:", error);
+            }
+        }
+
+        /**
+         * Verifica se os valores permaneceram estáveis por 5+ segundos
+         */
+        async function checkValueStability() {
+            const now = new Date();
+            
+            for (const binId of Object.keys(stabilityTrackers)) {
+                try {
+                    // Obtém a leitura atual do Firebase
+                    const doc = await db.collection("trash_bins").doc(binId).get();
+                    const currentValue = doc.exists ? doc.data().trash_level || 0 : 0;
+                    const tracker = stabilityTrackers[binId];
+                    
+                    // Se o valor mudou, reinicia o rastreamento
+                    if (currentValue !== tracker.currentValue) {
+                        tracker.currentValue = currentValue;
+                        tracker.firstDetected = now;
+                        continue;
+                    }
+                    
+                    // Se o valor é igual ao último armazenado, ignora
+                    if (currentValue === tracker.lastStoredValue) {
+                        continue;
+                    }
+                    
+                    // Verifica se o valor está estável há 5+ segundos
+                    if (tracker.firstDetected && (now - tracker.firstDetected) >= 5000) {
+                        // Adiciona ao histórico
+                        let history = JSON.parse(localStorage.getItem(`binHistory_${binId}`)) || [];
+                        history.push({
+                            timestamp: now.toISOString(),
+                            level: currentValue
+                        });
+                        
+                        // Mantém apenas os últimos 1000 registos
+                        if (history.length > 1000) {
+                            history = history.slice(-1000);
+                        }
+                        
+                        // Guarda no localStorage
+                        localStorage.setItem(`binHistory_${binId}`, JSON.stringify(history));
+                        tracker.lastStoredValue = currentValue;
+                        
+                        // Atualiza o gráfico específico
+                        await updateSingleChart(binId, getSelectedTimeRange());
+                    }
+                } catch (error) {
+                    console.error(`Erro ao verificar estabilidade para ${binId}:`, error);
+                }
+            }
+        }
+
+        /**
+         * Obtém o intervalo de tempo selecionado
+         */
+        function getSelectedTimeRange() {
+            const activeBtn = document.querySelector('.time-btn.active');
+            return activeBtn ? parseInt(activeBtn.dataset.hours) : 24;
+        }
+
+        /**
+         * Obtém o ícone baseado no tipo da lixeira
+         */
+        function getTypeIcon(type) {
+            const typeLower = type ? type.toLowerCase() : 'unknown';
+            switch(typeLower) {
+                case 'plastic': return 'fas fa-wine-bottle';
+                case 'cardboard': return 'fas fa-box';
+                case 'glass': return 'fas fa-wine-glass-alt';
+                default: return 'fas fa-trash-alt';
+            }
+        }
+
+        /**
+         * Obtém a cor baseada no tipo da lixeira
+         */
+        function getTypeColor(type) {
+            const typeLower = type ? type.toLowerCase() : 'unknown';
+            switch(typeLower) {
+                case 'plastic': return '#FFD700';
+                case 'cardboard': return '#2196F3';
+                case 'glass': return '#4CAF50';
+                default: return '#2e7d32';
+            }
+        }
+
+        /**
+         * Obtém o HTML do badge de tipo
+         */
+        function getTypeBadge(type) {
+            const typeLower = type ? type.toLowerCase() : 'unknown';
+            let className = 'type-unknown';
+            let displayType = type || 'Unknown';
+            
+            switch(typeLower) {
+                case 'plastic':
+                    className = 'type-plastic';
+                    break;
+                case 'cardboard':
+                    className = 'type-cardboard';
+                    break;
+                case 'glass':
+                    className = 'type-glass';
+                    break;
+            }
+            
+            return `<span class="type-badge ${className}"><i class="${getTypeIcon(type)}"></i> ${displayType}</span>`;
+        }
+
+        /**
+         * Carrega os dados principais e renderiza os gráficos
+         */
+        async function loadData(hours) {
+            try {
+                const chartsContainer = document.getElementById('charts-container');
+                chartsContainer.innerHTML = '';
+                
+                // Carregar dados de todas as lixeiras
+                const binIds = Object.keys(stabilityTrackers).sort();
+                
+                for (const binId of binIds) {
+                    const binData = await getHistoricalData(binId, hours);
+                    const canvasId = `${binId}Chart`;
+                    
+                    // Criar card para o gráfico
+                    const graphCard = document.createElement('div');
+                    graphCard.className = 'graph-card';
+                    graphCard.innerHTML = `
+                        <h2>
+                            <i class="${getTypeIcon(binTypes[binId])}" style="color: ${getTypeColor(binTypes[binId])};"></i>
+                            ${binId}
+                            ${getTypeBadge(binTypes[binId])}
+                        </h2>
+                        <canvas id="${canvasId}"></canvas>
+                    `;
+                    
+                    chartsContainer.appendChild(graphCard);
+                    
+                    // Renderizar gráfico
+                    await renderChart(canvasId, binId, binData, binTypes[binId]);
+                }
+                
+            } catch (error) {
+                console.error("Erro ao carregar histórico:", error);
+            }
+        }
+
+        /**
+         * Atualiza um único gráfico
+         */
+        async function updateSingleChart(binId, hours) {
+            try {
+                const binData = await getHistoricalData(binId, hours);
+                const canvasId = `${binId}Chart`;
+                
+                if (charts[canvasId]) {
+                    renderChart(canvasId, binId, binData, binTypes[binId]);
+                }
+            } catch (error) {
+                console.error(`Erro ao atualizar gráfico para ${binId}:`, error);
+            }
+        }
+
+        /**
+         * Obtém dados históricos do localStorage
+         */
+        function getHistoricalData(binId, hours) {
+            const history = JSON.parse(localStorage.getItem(`binHistory_${binId}`)) || [];
+            
+            // Calcula o tempo de corte (hora atual menos o intervalo selecionado)
+            const cutoff = new Date(Date.now() - (hours * 60 * 60 * 1000));
+            
+            return history
+                .filter(entry => new Date(entry.timestamp) >= cutoff)
+                .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        }
+
+        /**
+         * Renderiza os gráficos com tooltips melhorados
+         */
+        function renderChart(canvasId, binId, data, binType) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const color = getTypeColor(binType);
+            
+            // Destrói o gráfico anterior se existir
+            if (charts[canvasId]) {
+                charts[canvasId].destroy();
+            }
+            
+            // Formata as etiquetas com hora e data
+            const labels = data.map(item => {
+                const date = new Date(item.timestamp);
+                return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) +
+                       '\n' + date.toLocaleDateString([], {month: 'short', day: 'numeric'});
+            });
+            
+            // Cria uma nova instância do gráfico
+            charts[canvasId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: binId,
+                        data: data.map(item => item.level),
+                        borderColor: color,
+                        backgroundColor: `${color}20`,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: {
+                                    family: 'Nunito',
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            mode: 'nearest',
+                            intersect: true,
+                            callbacks: {
+                                title: (context) => {
+                                    const date = new Date(data[context[0].dataIndex].timestamp);
+                                    return date.toLocaleString();
+                                },
+                                label: (context) => {
+                                    return `Nível de Enchimento: ${context.parsed.y}%`;
+                                },
+                                footer: (context) => {
+                                    return `Lixeira: ${binId} (${binType || 'Unknown type'})`;
+                                }
+                            },
+                            backgroundColor: 'rgba(46, 125, 50, 0.9)',
+                            titleFont: { family: 'Nunito', size: 14, weight: 'bold' },
+                            bodyFont: { family: 'Nunito', size: 14 },
+                            footerFont: { family: 'Nunito', size: 12 },
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Nível de Enchimento (%)',
+                                font: {
+                                    family: 'Nunito',
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    family: 'Nunito',
+                                    size: 12
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tempo',
+                                font: {
+                                    family: 'Nunito',
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    family: 'Nunito',
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        const tooltip = document.getElementById('custom-tooltip');
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const timestamp = data[index].timestamp;
+                            const level = data[index].level;
+                            
+                            document.getElementById('tooltip-content').innerHTML = `
+                                <div style="color: #2e7d32; font-weight: bold; margin-bottom: 5px;">
+                                    ${new Date(timestamp).toLocaleString()}
+                                </div>
+                                <div>Nível de Enchimento: <strong>${level}%</strong></div>
+                                <div style="margin-top: 5px; color: #666; font-size: 0.9rem;">
+                                    Lixeira: ${binId}<br>
+                                    Tipo: ${binType || 'Unknown'}
+                                </div>
+                            `;
+                            
+                            tooltip.style.display = 'block';
+                            tooltip.style.left = `${event.clientX + 10}px`;
+                            tooltip.style.top = `${event.clientY + 10}px`;
+                            tooltip.style.pointerEvents = 'auto';
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Exporta os dados para Excel
+         */
+        async function exportToExcel() {
+            try {
+                const binIds = Object.keys(stabilityTrackers).sort();
+                const excelData = [];
+                
+                for (const binId of binIds) {
+                    const binData = await getHistoricalData(binId, 168);
+                    const type = binTypes[binId] || 'unknown';
+                    
+                    binData.forEach(item => {
+                        excelData.push({
+                            'ID da Lixeira': binId,
+                            'Tipo': type,
+                            'Data/Hora': new Date(item.timestamp).toLocaleString(),
+                            'Nível de Enchimento (%)': item.level
+                        });
+                    });
+                }
+                
+                if (excelData.length === 0) {
+                    alert("Não há dados para exportar.");
+                    return;
+                }
+                
+                const ws = XLSX.utils.json_to_sheet(excelData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Histórico");
+                XLSX.writeFile(wb, `BinGo_Histórico_${new Date().toISOString().split('T')[0]}.xlsx`);
+                
+            } catch (error) {
+                console.error("Falha na exportação:", error);
+                alert("Falha ao exportar para Excel. Por favor, tente novamente.");
+            }
+        }
+
+        /**
+         * Exporta os dados para PDF
+         */
+        async function exportToPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm'
+                });
+                
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(18);
+                doc.setTextColor(46, 125, 50);
+                doc.text('Histórico BinGo - Níveis de Lixo', 105, 20, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Gerado em: ${new Date().toLocaleString()}`, 105, 27, { align: 'center' });
+                
+                const binIds = Object.keys(stabilityTrackers).sort();
+                let yPosition = 35;
+                
+                for (const binId of binIds) {
+                    const canvas = document.getElementById(`${binId}Chart`);
+                    const type = binTypes[binId] || 'Unknown';
+                    
+                    doc.setFontSize(14);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`${binId} (${type})`, 20, yPosition);
+                    
+                    if (canvas) {
+                        const imageData = canvas.toDataURL('image/png', 1.0);
+                        doc.addImage(imageData, 'PNG', 20, yPosition + 5, 170, 80);
+                    } else {
+                        doc.setFontSize(12);
+                        doc.setTextColor(100, 100, 100);
+                        doc.text("No data available for this bin", 20, yPosition + 10);
+                    }
+                    
+                    yPosition += 90;
+                    
+                    if (yPosition > 250 && binId !== binIds[binIds.length - 1]) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                }
+                
+                doc.save(`BinGo_Histórico_${new Date().toISOString().split('T')[0]}.pdf`);
+                
+            } catch (error) {
+                console.error("Falha na exportação:", error);
+                alert("Falha ao gerar PDF. Por favor, tente novamente.");
+            }
+        }
+    </script>
+</body>
+</html>

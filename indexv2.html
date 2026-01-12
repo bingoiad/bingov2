@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BinGo Dashboard</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --secondary: #388e3c;
+            --accent: #7cb342;
+            --danger: #d32f2f;
+            --warning: #ffa000;
+            --light: #f1f8e9;
+            --dark: #1b5e20;
+            --text: #2e3a3d;
+            --gray: #78909c;
+            --plastic: #FFD700;     /* Yellow for plastic */
+            --cardboard: #2196F3;    /* Blue for cardboard */
+            --glass: #4CAF50;        /* Green for glass */
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: var(--text);
+            position: relative;
+            padding-bottom: 80px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h1 {
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        
+        /* Search Container Styles */
+        .search-container {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 0.8rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.6rem 0.9rem;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.2);
+            outline: none;
+        }
+
+        .search-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-btn:hover {
+            background: var(--dark);
+        }
+
+        .search-btn i {
+            font-size: 0.9rem;
+        }
+
+        .search-btn.secondary {
+            background: var(--accent);
+        }
+
+        .search-btn.secondary:hover {
+            background: var(--secondary);
+        }
+
+        /* Search Results */
+        .search-results {
+            margin-top: 0.3rem;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .search-result-item {
+            padding: 0.8rem 1rem;
+            background: white;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .search-result-item:hover {
+            background: rgba(241, 248, 233, 0.5);
+        }
+
+        .search-result-item .bin-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .search-result-item .bin-id {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .search-result-item .fullness {
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .search-result-item .location {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .search-result-item .separator {
+            color: var(--gray);
+            opacity: 0.5;
+        }
+        
+        /* Bin Cards */
+        .bin-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .bin-card.plastic {
+            border-left: 4px solid var(--plastic);
+        }
+        
+        .bin-card.cardboard {
+            border-left: 4px solid var(--cardboard);
+        }
+        
+        .bin-card.glass {
+            border-left: 4px solid var(--glass);
+        }
+        
+        .bin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .bin-id {
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .bin-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+        
+        .type-plastic {
+            background-color: rgba(255, 215, 0, 0.15);
+            color: #B8860B;
+        }
+        
+        .type-cardboard {
+            background-color: rgba(33, 150, 243, 0.15);
+            color: #1565C0;
+        }
+        
+        .type-glass {
+            background-color: rgba(76, 175, 80, 0.15);
+            color: #2E7D32;
+        }
+        
+        .location {
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.75rem 0;
+        }
+        
+        .trash-level {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .view-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .view-link:hover {
+            color: var(--dark);
+        }
+        
+        .loading-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(46, 125, 50, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        .error {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+            color: var(--danger);
+            margin-bottom: 1.5rem;
+        }
+        
+        .error button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        .error button:hover {
+            background: var(--dark);
+        }
+        
+        .last-updated {
+            color: var(--gray);
+            font-size: 0.85rem;
+            text-align: right;
+            margin-top: 1.5rem;
+            font-style: italic;
+        }
+        
+        .floating-history-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 100;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .floating-history-btn:hover {
+            background: var(--dark);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Fun fact bar styles */
+        .fun-fact-bar {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+        }
+        
+        .fun-fact-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        #trash-fact {
+            color: #2e7d32;
+            font-weight: 500;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        #fact-text {
+            font-weight: 400;
+            color: #2e7d32;
+        }
+        
+        .pulse {
+            color: #2e7d32;
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+        
+        .next-fact-btn {
+            background: none;
+            border: none;
+            color: #2e7d32;
+            cursor: pointer;
+            padding: 0.3rem;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .next-fact-btn:hover {
+            background: rgba(46, 125, 50, 0.1);
+            transform: scale(1.1);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .search-row {
+                flex-direction: column;
+            }
+            
+            .search-input, .search-btn {
+                width: 100%;
+            }
+            
+            .bin-card {
+                padding: 1.25rem;
+            }
+            
+            .floating-history-btn {
+                bottom: 15px;
+                right: 15px;
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+            
+            .fun-fact-content {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            #trash-fact {
+                flex-direction: column;
+                font-size: 0.85rem;
+            }
+            
+            .next-fact-btn {
+                margin-top: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Recycling fun fact bar -->
+    <div class="fun-fact-bar">
+      <div class="fun-fact-content">
+        <i class="fas fa-recycle pulse"></i>
+        <span id="trash-fact">Did you know? <span id="fact-text">Loading fascinating fact...</span></span>
+        <button class="next-fact-btn" title="Next fact">
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="container">
+        <h1>
+            <i class="fas fa-recycle"></i>
+            BinGo Dashboard
+        </h1>
+        
+        <!-- Search Container -->
+        <div class="search-container">
+            <div class="search-row">
+                <input type="text" id="search-input" class="search-input" placeholder="Search by bin ID, type, or location...">
+                <button id="search-btn" class="search-btn">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+            <div class="search-row">
+                <button id="filter-plastic" class="search-btn secondary" style="background: #FFD700; color: #333;">
+                    <i class="fas fa-wine-bottle"></i> Plastic Bins
+                </button>
+                <button id="filter-cardboard" class="search-btn secondary" style="background: #2196F3;">
+                    <i class="fas fa-box"></i> Cardboard Bins
+                </button>
+                <button id="filter-glass" class="search-btn secondary" style="background: #4CAF50;">
+                    <i class="fas fa-wine-glass-alt"></i> Glass Bins
+                </button>
+                <button id="clear-filters" class="search-btn secondary">
+                    <i class="fas fa-times"></i> Clear Filters
+                </button>
+            </div>
+            
+            <!-- Search Results -->
+            <div id="search-results" class="search-results"></div>
+        </div>
+        
+        <!-- Bins List -->
+        <div id="bins-list">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p>Loading bins data...</p>
+            </div>
+        </div>
+        
+        <p id="last-updated" class="last-updated"></p>
+    </div>
+
+    <!-- Floating history button -->
+    <a href="history.html" class="floating-history-btn">
+        <i class="fas fa-chart-line"></i>
+        <span>Trash Level History</span>
+    </a>
+
+    <script>
+        // Recycling facts database
+        const recyclingFacts = {
+            general: [
+                "🌎 The world produces over 2.1 billion tons of waste annually - equivalent to 7,000 Empire State Buildings",
+                "♻️ Recycling one ton of mixed paper saves 165 trees and 7,000 gallons of water",
+                "⏳ A single plastic bottle can take 450 years to decompose in landfills",
+                "📈 If all Americans recycled just 10% more paper, we'd save 5 million trees per year",
+                "🏙️ New Yorkers throw away enough trash daily to fill the Empire State Building",
+                "🌳 Recycling one ton of cardboard saves 46 gallons of oil",
+                "💧 Producing recycled paper uses 60% less water than virgin paper production",
+                "⚡ Recycling aluminum saves 95% of the energy needed to make new aluminum",
+                "🔥 Incinerating 10,000 tons of waste creates 1 job, while recycling creates 10 jobs",
+                "🏭 The recycling industry generates $117 billion in economic activity annually"
+            ],
+            plastic: [
+                "🔄 Only 9% of the 9.2 billion tons of plastic ever produced has been recycled",
+                "🌊 Every minute, a garbage truck's worth of plastic enters our oceans",
+                "👕 It takes about 25 recycled PET bottles to make one polyester fleece jacket",
+                "🛑 Microplastics have been found in 83% of tap water samples worldwide",
+                "🔄 The plastic recycling symbol (♹) was created in 1988 but doesn't guarantee recyclability",
+                "🧴 Plastic shampoo bottles take 500+ years to decompose in landfills",
+                "🥤 The world uses 1 million plastic bottles per minute - 91% aren't recycled",
+                "🛍️ Americans use 100 billion plastic bags annually - recycling just 1% of them",
+                "🍽️ Plastic cutlery is among the top 10 most common beach litter items",
+                "🧩 Less than 1% of polystyrene (Styrofoam) is recycled due to processing costs"
+            ],
+            cardboard: [
+                "📜 The first recorded paper recycling occurred in Japan in 1031 AD",
+                "📦 Corrugated cardboard has an 89% US recycling rate - the highest of any material",
+                "📨 The average American receives 41 pounds of junk mail yearly - most unrecycled",
+                "🌳 Recycling 1 ton of newspaper saves about 15 trees and 7,000 gallons of water",
+                "💧 Paper mills using recycled content produce 35% less water pollution",
+                "📚 Recycling all US newspapers could save 250 million trees annually",
+                "📊 Office paper can be recycled 5-7 times before fibers become too short",
+                "☕ Wax-coated paper cups aren't recyclable in most facilities - 16 billion are used yearly",
+                "🗞️ Newspaper takes about 6 weeks to decompose in nature (vs. 2-5 months for cardboard)",
+                "📝 The first US newspaper printed on recycled paper was the Boston Globe in 1874"
+            ],
+            glass: [
+                "🔘 Glass can be recycled indefinitely without loss of quality",
+                "⚡ Recycling one glass bottle saves enough energy to power a 100-watt bulb for 4 hours",
+                "🔄 A glass container can go from recycling bin to store shelf in as little as 30 days",
+                "🏭 Recycled glass reduces related air pollution by 20% and water pollution by 50%",
+                "🌡️ Glass produced from recycled glass instead of raw materials melts at a lower temperature",
+                "💎 For every ton of glass recycled, over a ton of natural resources are saved",
+                "🔄 Glass bottles and jars are 100% recyclable and can be recycled endlessly",
+                "🏺 The first known glass objects date back to around 3500 BCE in Mesopotamia",
+                "🔬 Recycled glass is called 'cullet' and can make up as much as 95% of new glass",
+                "🔄 Recycling one glass bottle saves enough energy to light a 100-watt bulb for 4 hours"
+            ]
+        };
+
+        // Combine all facts into one array
+        const allFacts = Object.values(recyclingFacts).flat();
+
+        // Show random recycling fact
+        function showRandomFact() {
+            const factElement = document.getElementById('fact-text');
+            const container = document.getElementById('trash-fact');
+            
+            factElement.style.transition = 'opacity 0.3s ease';
+            factElement.style.opacity = 0;
+            
+            setTimeout(() => {
+                const randomFact = allFacts[Math.floor(Math.random() * allFacts.length)];
+                factElement.textContent = randomFact;
+                factElement.classList.add('fact-transition');
+                factElement.style.opacity = 1;
+                
+                setTimeout(() => {
+                    factElement.classList.remove('fact-transition');
+                }, 700);
+            }, 300);
+        }
+
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4SndxF5ZZcZHUj6m1TXghyNRh2uN7AkU",
+            authDomain: "bingo-b9b42.firebaseapp.com",
+            projectId: "bingo-b9b42",
+            storageBucket: "bingo-b9b42.appspot.com",
+            messagingSenderId: "588496760146",
+            appId: "1:588496760146:web:1a3751363269ce12b5de8b"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Global variables
+        let allBins = [];
+        let currentFilter = 'all';
+
+        // Update last fetched time
+        function updateLastFetchedTime() {
+            const now = new Date();
+            document.getElementById('last-updated').textContent =
+                `Last updated: ${now.toLocaleTimeString()}`;
+        }
+
+        // Get type badge HTML
+        function getTypeBadge(type) {
+            const typeLower = type ? type.toLowerCase() : 'unknown';
+            let icon = 'fas fa-trash-alt';
+            let className = 'type-unknown';
+            
+            switch(typeLower) {
+                case 'plastic':
+                    icon = 'fas fa-wine-bottle';
+                    className = 'type-plastic';
+                    break;
+                case 'cardboard':
+                    icon = 'fas fa-box';
+                    className = 'type-cardboard';
+                    break;
+                case 'glass':
+                    icon = 'fas fa-wine-glass-alt';
+                    className = 'type-glass';
+                    break;
+            }
+            
+            return `<span class="bin-type ${className}"><i class="${icon}"></i> ${type || 'Unknown'}</span>`;
+        }
+
+        // Get bin card class based on type
+        function getBinCardClass(type) {
+            const typeLower = type ? type.toLowerCase() : '';
+            switch(typeLower) {
+                case 'plastic': return 'plastic';
+                case 'cardboard': return 'cardboard';
+                case 'glass': return 'glass';
+                default: return '';
+            }
+        }
+
+        // Search bins by text
+        function searchBins(searchTerm) {
+            const resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = '';
+            
+            if (!searchTerm.trim()) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+            
+            const term = searchTerm.toLowerCase();
+            const filteredBins = allBins.filter(bin =>
+                bin.id.toLowerCase().includes(term) ||
+                (bin.data.location && bin.data.location.toLowerCase().includes(term)) ||
+                (bin.data.type && bin.data.type.toLowerCase().includes(term))
+            ).sort((a, b) => a.id.localeCompare(b.id));
+            
+            if (filteredBins.length === 0) {
+                resultsContainer.innerHTML = '<div class="search-result-item">No bins found matching your search</div>';
+            } else {
+                filteredBins.forEach(bin => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'search-result-item';
+                    resultItem.innerHTML = `
+                        <div class="bin-header">
+                            <span class="bin-id">${bin.id}</span>
+                            <span class="separator">|</span>
+                            <span class="fullness">${bin.data.trash_level || '0'}% full</span>
+                            <span class="separator">|</span>
+                            ${getTypeBadge(bin.data.type)}
+                        </div>
+                        <div class="location">${bin.data.location || 'Location not specified'}</div>
+                    `;
+                    resultItem.addEventListener('click', () => {
+                        window.location.href = `bin.html?id=${bin.id}`;
+                    });
+                    resultsContainer.appendChild(resultItem);
+                });
+            }
+            
+            resultsContainer.style.display = 'block';
+        }
+
+        // Filter bins by type
+        function filterBinsByType(type) {
+            currentFilter = type;
+            const binsList = document.getElementById('bins-list');
+            
+            if (type === 'all') {
+                renderAllBins(allBins);
+                return;
+            }
+            
+            const filteredBins = allBins.filter(bin =>
+                bin.data.type && bin.data.type.toLowerCase() === type.toLowerCase()
+            );
+            
+            if (filteredBins.length === 0) {
+                binsList.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-info-circle"></i>
+                        <p>No ${type} bins found.</p>
+                        <button onclick="clearFilters()">
+                            <i class="fas fa-times"></i> Clear Filter
+                        </button>
+                    </div>
+                `;
+            } else {
+                renderAllBins(filteredBins);
+            }
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            currentFilter = 'all';
+            renderAllBins(allBins);
+            document.getElementById('search-input').value = '';
+            document.getElementById('search-results').style.display = 'none';
+        }
+
+        // Render all bins
+        function renderAllBins(bins) {
+            const binsList = document.getElementById('bins-list');
+            
+            if (bins.length === 0) {
+                binsList.innerHTML = '<div class="error"><i class="fas fa-info-circle"></i><p>No bins found in the system.</p></div>';
+                return;
+            }
+
+            binsList.innerHTML = '';
+            
+            bins.forEach((bin) => {
+                const binCardClass = getBinCardClass(bin.data.type);
+                binsList.innerHTML += `
+                    <div class="bin-card ${binCardClass}">
+                        <h2 class="bin-id">
+                            <i class="fas fa-trash-alt"></i>
+                            Bin ID: ${bin.id}
+                            ${getTypeBadge(bin.data.type)}
+                        </h2>
+                        <p class="location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${bin.data.location || 'Location not specified'}
+                        </p>
+                        <p class="trash-level">
+                            <i class="fas fa-tachometer-alt"></i>
+                            ${bin.data.trash_level || '0'}% full
+                        </p>
+                        <a href="bin.html?id=${bin.id}" class="view-link">
+                            View details <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                `;
+            });
+            
+            updateLastFetchedTime();
+        }
+
+        // Load all bins from Firebase
+        function loadBins() {
+            db.collection("trash_bins").get().then((querySnapshot) => {
+                allBins = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const bin = { id: doc.id, data: doc.data() };
+                    allBins.push(bin);
+                });
+                
+                // Sort bins by ID
+                allBins.sort((a, b) => a.id.localeCompare(b.id));
+                
+                // Apply current filter
+                if (currentFilter === 'all') {
+                    renderAllBins(allBins);
+                } else {
+                    filterBinsByType(currentFilter);
+                }
+                
+            }).catch((error) => {
+                console.error("Firebase error:", error);
+                const binsList = document.getElementById('bins-list');
+                binsList.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load data.</p>
+                        <button onclick="window.location.reload()">
+                            <i class="fas fa-sync-alt"></i> Retry
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load bins and setup auto-refresh
+            loadBins();
+            setInterval(loadBins, 30000);
+            
+            // Setup recycling facts
+            showRandomFact();
+            setInterval(showRandomFact, 30000);
+            document.querySelector('.next-fact-btn').addEventListener('click', showRandomFact);
+            document.querySelector('.fun-fact-bar').addEventListener('click', function(e) {
+                if (!e.target.closest('.next-fact-btn')) {
+                    showRandomFact();
+                }
+            });
+            
+            // Setup search functionality
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            
+            searchInput.addEventListener('input', () => {
+                searchBins(searchInput.value);
+            });
+            
+            searchBtn.addEventListener('click', () => {
+                searchBins(searchInput.value);
+            });
+            
+            // Setup filter buttons
+            document.getElementById('filter-plastic').addEventListener('click', () => filterBinsByType('plastic'));
+            document.getElementById('filter-cardboard').addEventListener('click', () => filterBinsByType('cardboard'));
+            document.getElementById('filter-glass').addEventListener('click', () => filterBinsByType('glass'));
+            document.getElementById('clear-filters').addEventListener('click', clearFilters);
+            
+            // Close search results when clicking outside
+            document.addEventListener('click', (e) => {
+                const searchContainer = document.querySelector('.search-container');
+                if (!searchContainer.contains(e.target)) {
+                    document.getElementById('search-results').style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
