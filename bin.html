@@ -259,7 +259,7 @@
                 <div class="alert-content">
                     <h3 class="alert-title">Bin Almost Full!</h3>
                     <p class="alert-message">This bin is over 75% capacity. Please consider using an alternative location.</p>
-                    <a href="indexv2.html" class="find-bin-btn">
+                    <a href="index.html" class="find-bin-btn">
                         <i class="fas fa-search-location"></i> Find Available Bins
                     </a>
                 </div>
@@ -284,7 +284,7 @@
             <p id="last-updated" class="last-updated">-</p>
         </div>
         
-        <a href="indexv2.html" class="back-link">
+        <a href="index.html" class="back-link">
             <i class="fas fa-arrow-left"></i>
             Back to Dashboard
         </a>
@@ -455,7 +455,7 @@
                     } else {
                         suggestionText.textContent = `The nearest available ${currentBinType} bin is ${alternativeBin.id} (${altTrashLevel}% full).`;
                         suggestionTitle.textContent = `Alternative ${currentBinType.charAt(0).toUpperCase() + currentBinType.slice(1)} Bin Available`;
-                        suggestionLink.href = `binv2.html?id=${alternativeBin.id}&fromFull=true&fromLocation=${encodeURIComponent(originalBinLocation)}`;
+                        suggestionLink.href = `bin.html?id=${alternativeBin.id}&fromFull=true&fromLocation=${encodeURIComponent(originalBinLocation)}`;
                         
                         const altBinLocation = alternativeBin.data.location || 'Unknown location';
                         navigationLink.href = generateMapsLink(currentBinLocation, altBinLocation);

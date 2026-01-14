@@ -512,7 +512,7 @@
         <p id="last-updated" class="last-updated"></p>
     </div>
 
-    <a href="historyv2.html" class="floating-history-btn">
+    <a href="history.html" class="floating-history-btn">
         <i class="fas fa-chart-line"></i>
         <span>Trash Level History</span>
     </a>
@@ -624,7 +624,7 @@
                         <div class="location">${bin.data.location || 'Location not specified'}</div>
                     `;
                     resultItem.addEventListener('click', () => {
-                        window.location.href = `binv2.html?id=${bin.id}`;
+                        window.location.href = `bin.html?id=${bin.id}`;
                     });
                     resultsContainer.appendChild(resultItem);
                 });
@@ -637,8 +637,6 @@
             currentFilter = type;
             const binsList = document.getElementById('bins-list');
             
-            // Just toggling visibility based on classes is easier/cleaner but we rebuild here
-            // to maintain the exact logic structure
             const filteredBins = (type === 'all')
                 ? allBins
                 : allBins.filter(bin => bin.data.type && bin.data.type.toLowerCase() === type.toLowerCase());
@@ -665,7 +663,6 @@
             document.getElementById('search-results').style.display = 'none';
         }
 
-        // New Render Helper
         function renderBinList(binsToRender) {
              const binsList = document.getElementById('bins-list');
              binsList.innerHTML = '';
@@ -680,8 +677,6 @@
              });
              updateLastFetchedTime();
         }
-
-        // ** REALTIME & BUFFERING LOGIC **
 
         function createBinCard(id, data) {
             const binCardClass = getBinCardClass(data.type);
@@ -703,7 +698,7 @@
                     <i class="fas fa-tachometer-alt"></i>
                     <span id="level-${id}">${data.trash_level || '0'}</span>% full
                 </p>
-                <a href="binv2.html?id=${id}" class="view-link">
+                <a href="bin.html?id=${id}" class="view-link">
                     View details <i class="fas fa-arrow-right"></i>
                 </a>
             `;
@@ -748,7 +743,6 @@
 
                     if (change.type === "added") {
                         allBins.push({ id: binId, data: data });
-                        // Only append to DOM if it matches current filter
                         if (currentFilter === 'all' || (data.type && data.type.toLowerCase() === currentFilter)) {
                             binsList.appendChild(createBinCard(binId, data));
                         }
@@ -762,17 +756,12 @@
                         const index = allBins.findIndex(b => b.id === binId);
                         if (index !== -1) allBins[index].data = data;
 
-                        // Buffer Value
                         const level = data.trash_level !== undefined ? Number(data.trash_level) : 0;
                         if (!binBuffers[binId]) binBuffers[binId] = [];
                         binBuffers[binId].push(level);
 
-                        // Static updates
                         const locEl = document.getElementById(`loc-${binId}`);
                         if (locEl && data.location) locEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${data.location}`;
-                        
-                        // If type changed, re-render might be needed for class/badge,
-                        // but usually type is static. If needed, we'd replace the card.
                     }
                     
                     if (change.type === "removed") {
@@ -783,7 +772,6 @@
                     }
                 });
                 
-                // Sort on initial load or additions
                 allBins.sort((a, b) => a.id.localeCompare(b.id));
 
             }, (error) => {
