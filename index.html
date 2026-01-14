@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BinGo Dashboard</title>
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -464,7 +461,6 @@
 </head>
 <body>
     
-    <!-- Recycling fun fact bar -->
     <div class="fun-fact-bar">
       <div class="fun-fact-content">
         <i class="fas fa-recycle pulse"></i>
@@ -481,7 +477,6 @@
             BinGo Dashboard
         </h1>
         
-        <!-- Search Container -->
         <div class="search-container">
             <div class="search-row">
                 <input type="text" id="search-input" class="search-input" placeholder="Search by bin ID, type, or location...">
@@ -504,11 +499,9 @@
                 </button>
             </div>
             
-            <!-- Search Results -->
             <div id="search-results" class="search-results"></div>
         </div>
         
-        <!-- Bins List -->
         <div id="bins-list">
             <div class="loading-container">
                 <div class="loading-spinner"></div>
@@ -519,8 +512,7 @@
         <p id="last-updated" class="last-updated"></p>
     </div>
 
-    <!-- Floating history button -->
-    <a href="history.html" class="floating-history-btn">
+    <a href="historyv2.html" class="floating-history-btn">
         <i class="fas fa-chart-line"></i>
         <span>Trash Level History</span>
     </a>
@@ -528,76 +520,22 @@
     <script>
         // Recycling facts database
         const recyclingFacts = {
-            general: [
-                "🌎 The world produces over 2.1 billion tons of waste annually - equivalent to 7,000 Empire State Buildings",
-                "♻️ Recycling one ton of mixed paper saves 165 trees and 7,000 gallons of water",
-                "⏳ A single plastic bottle can take 450 years to decompose in landfills",
-                "📈 If all Americans recycled just 10% more paper, we'd save 5 million trees per year",
-                "🏙️ New Yorkers throw away enough trash daily to fill the Empire State Building",
-                "🌳 Recycling one ton of cardboard saves 46 gallons of oil",
-                "💧 Producing recycled paper uses 60% less water than virgin paper production",
-                "⚡ Recycling aluminum saves 95% of the energy needed to make new aluminum",
-                "🔥 Incinerating 10,000 tons of waste creates 1 job, while recycling creates 10 jobs",
-                "🏭 The recycling industry generates $117 billion in economic activity annually"
-            ],
-            plastic: [
-                "🔄 Only 9% of the 9.2 billion tons of plastic ever produced has been recycled",
-                "🌊 Every minute, a garbage truck's worth of plastic enters our oceans",
-                "👕 It takes about 25 recycled PET bottles to make one polyester fleece jacket",
-                "🛑 Microplastics have been found in 83% of tap water samples worldwide",
-                "🔄 The plastic recycling symbol (♹) was created in 1988 but doesn't guarantee recyclability",
-                "🧴 Plastic shampoo bottles take 500+ years to decompose in landfills",
-                "🥤 The world uses 1 million plastic bottles per minute - 91% aren't recycled",
-                "🛍️ Americans use 100 billion plastic bags annually - recycling just 1% of them",
-                "🍽️ Plastic cutlery is among the top 10 most common beach litter items",
-                "🧩 Less than 1% of polystyrene (Styrofoam) is recycled due to processing costs"
-            ],
-            cardboard: [
-                "📜 The first recorded paper recycling occurred in Japan in 1031 AD",
-                "📦 Corrugated cardboard has an 89% US recycling rate - the highest of any material",
-                "📨 The average American receives 41 pounds of junk mail yearly - most unrecycled",
-                "🌳 Recycling 1 ton of newspaper saves about 15 trees and 7,000 gallons of water",
-                "💧 Paper mills using recycled content produce 35% less water pollution",
-                "📚 Recycling all US newspapers could save 250 million trees annually",
-                "📊 Office paper can be recycled 5-7 times before fibers become too short",
-                "☕ Wax-coated paper cups aren't recyclable in most facilities - 16 billion are used yearly",
-                "🗞️ Newspaper takes about 6 weeks to decompose in nature (vs. 2-5 months for cardboard)",
-                "📝 The first US newspaper printed on recycled paper was the Boston Globe in 1874"
-            ],
-            glass: [
-                "🔘 Glass can be recycled indefinitely without loss of quality",
-                "⚡ Recycling one glass bottle saves enough energy to power a 100-watt bulb for 4 hours",
-                "🔄 A glass container can go from recycling bin to store shelf in as little as 30 days",
-                "🏭 Recycled glass reduces related air pollution by 20% and water pollution by 50%",
-                "🌡️ Glass produced from recycled glass instead of raw materials melts at a lower temperature",
-                "💎 For every ton of glass recycled, over a ton of natural resources are saved",
-                "🔄 Glass bottles and jars are 100% recyclable and can be recycled endlessly",
-                "🏺 The first known glass objects date back to around 3500 BCE in Mesopotamia",
-                "🔬 Recycled glass is called 'cullet' and can make up as much as 95% of new glass",
-                "🔄 Recycling one glass bottle saves enough energy to light a 100-watt bulb for 4 hours"
-            ]
+            general: [ "🌎 The world produces over 2.1 billion tons of waste annually", "♻️ Recycling one ton of mixed paper saves 165 trees", "⏳ A single plastic bottle can take 450 years to decompose", "📈 If all Americans recycled 10% more paper, we'd save 5 million trees", "🏙️ New Yorkers throw away enough trash daily to fill the Empire State Building" ],
+            plastic: [ "🔄 Only 9% of 9.2 billion tons of plastic has been recycled", "🌊 Every minute, a garbage truck's worth of plastic enters our oceans", "👕 It takes 25 recycled bottles to make one fleece jacket" ],
+            cardboard: [ "📜 First paper recycling occurred in Japan in 1031 AD", "📦 Cardboard has an 89% US recycling rate", "🌳 Recycling 1 ton of newspaper saves 15 trees" ],
+            glass: [ "🔘 Glass can be recycled indefinitely without loss of quality", "⚡ Recycling one glass bottle saves energy for a 100W bulb for 4h", "🔄 A glass bottle can go from bin to shelf in 30 days" ]
         };
 
-        // Combine all facts into one array
         const allFacts = Object.values(recyclingFacts).flat();
 
-        // Show random recycling fact
         function showRandomFact() {
             const factElement = document.getElementById('fact-text');
-            const container = document.getElementById('trash-fact');
-            
             factElement.style.transition = 'opacity 0.3s ease';
             factElement.style.opacity = 0;
-            
             setTimeout(() => {
                 const randomFact = allFacts[Math.floor(Math.random() * allFacts.length)];
                 factElement.textContent = randomFact;
-                factElement.classList.add('fact-transition');
                 factElement.style.opacity = 1;
-                
-                setTimeout(() => {
-                    factElement.classList.remove('fact-transition');
-                }, 700);
             }, 300);
         }
 
@@ -617,39 +555,32 @@
         // Global variables
         let allBins = [];
         let currentFilter = 'all';
+        
+        // ** STABILITY VARIABLES **
+        let binBuffers = {};
+        let processingInterval = null;
+        let unsubscribeListener = null;
 
-        // Update last fetched time
         function updateLastFetchedTime() {
             const now = new Date();
             document.getElementById('last-updated').textContent =
                 `Last updated: ${now.toLocaleTimeString()}`;
         }
 
-        // Get type badge HTML
         function getTypeBadge(type) {
             const typeLower = type ? type.toLowerCase() : 'unknown';
             let icon = 'fas fa-trash-alt';
             let className = 'type-unknown';
             
             switch(typeLower) {
-                case 'plastic':
-                    icon = 'fas fa-wine-bottle';
-                    className = 'type-plastic';
-                    break;
-                case 'cardboard':
-                    icon = 'fas fa-box';
-                    className = 'type-cardboard';
-                    break;
-                case 'glass':
-                    icon = 'fas fa-wine-glass-alt';
-                    className = 'type-glass';
-                    break;
+                case 'plastic': icon = 'fas fa-wine-bottle'; className = 'type-plastic'; break;
+                case 'cardboard': icon = 'fas fa-box'; className = 'type-cardboard'; break;
+                case 'glass': icon = 'fas fa-wine-glass-alt'; className = 'type-glass'; break;
             }
             
             return `<span class="bin-type ${className}"><i class="${icon}"></i> ${type || 'Unknown'}</span>`;
         }
 
-        // Get bin card class based on type
         function getBinCardClass(type) {
             const typeLower = type ? type.toLowerCase() : '';
             switch(typeLower) {
@@ -660,7 +591,6 @@
             }
         }
 
-        // Search bins by text
         function searchBins(searchTerm) {
             const resultsContainer = document.getElementById('search-results');
             resultsContainer.innerHTML = '';
@@ -694,7 +624,7 @@
                         <div class="location">${bin.data.location || 'Location not specified'}</div>
                     `;
                     resultItem.addEventListener('click', () => {
-                        window.location.href = `bin.html?id=${bin.id}`;
+                        window.location.href = `binv2.html?id=${bin.id}`;
                     });
                     resultsContainer.appendChild(resultItem);
                 });
@@ -703,22 +633,20 @@
             resultsContainer.style.display = 'block';
         }
 
-        // Filter bins by type
         function filterBinsByType(type) {
             currentFilter = type;
             const binsList = document.getElementById('bins-list');
             
-            if (type === 'all') {
-                renderAllBins(allBins);
-                return;
-            }
+            // Just toggling visibility based on classes is easier/cleaner but we rebuild here
+            // to maintain the exact logic structure
+            const filteredBins = (type === 'all')
+                ? allBins
+                : allBins.filter(bin => bin.data.type && bin.data.type.toLowerCase() === type.toLowerCase());
+
+            renderBinList(filteredBins);
             
-            const filteredBins = allBins.filter(bin =>
-                bin.data.type && bin.data.type.toLowerCase() === type.toLowerCase()
-            );
-            
-            if (filteredBins.length === 0) {
-                binsList.innerHTML = `
+            if (filteredBins.length === 0 && type !== 'all') {
+                 binsList.innerHTML = `
                     <div class="error">
                         <i class="fas fa-info-circle"></i>
                         <p>No ${type} bins found.</p>
@@ -727,133 +655,172 @@
                         </button>
                     </div>
                 `;
-            } else {
-                renderAllBins(filteredBins);
             }
         }
 
-        // Clear all filters
         function clearFilters() {
             currentFilter = 'all';
-            renderAllBins(allBins);
+            renderBinList(allBins);
             document.getElementById('search-input').value = '';
             document.getElementById('search-results').style.display = 'none';
         }
 
-        // Render all bins
-        function renderAllBins(bins) {
+        // New Render Helper
+        function renderBinList(binsToRender) {
+             const binsList = document.getElementById('bins-list');
+             binsList.innerHTML = '';
+             
+             if(binsToRender.length === 0 && currentFilter === 'all') {
+                  binsList.innerHTML = '<div class="error"><i class="fas fa-info-circle"></i><p>No bins found.</p></div>';
+                  return;
+             }
+
+             binsToRender.forEach(bin => {
+                 binsList.appendChild(createBinCard(bin.id, bin.data));
+             });
+             updateLastFetchedTime();
+        }
+
+        // ** REALTIME & BUFFERING LOGIC **
+
+        function createBinCard(id, data) {
+            const binCardClass = getBinCardClass(data.type);
+            const div = document.createElement('div');
+            div.className = `bin-card ${binCardClass}`;
+            div.id = `card-${id}`;
+            
+            div.innerHTML = `
+                <h2 class="bin-id">
+                    <i class="fas fa-trash-alt"></i>
+                    Bin ID: ${id}
+                    ${getTypeBadge(data.type)}
+                </h2>
+                <p class="location" id="loc-${id}">
+                    <i class="fas fa-map-marker-alt"></i>
+                    ${data.location || 'Location not specified'}
+                </p>
+                <p class="trash-level">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span id="level-${id}">${data.trash_level || '0'}</span>% full
+                </p>
+                <a href="binv2.html?id=${id}" class="view-link">
+                    View details <i class="fas fa-arrow-right"></i>
+                </a>
+            `;
+            return div;
+        }
+
+        function setupRealtimeListener() {
             const binsList = document.getElementById('bins-list');
             
-            if (bins.length === 0) {
-                binsList.innerHTML = '<div class="error"><i class="fas fa-info-circle"></i><p>No bins found in the system.</p></div>';
-                return;
-            }
-
-            binsList.innerHTML = '';
+            if (processingInterval) clearInterval(processingInterval);
             
-            bins.forEach((bin) => {
-                const binCardClass = getBinCardClass(bin.data.type);
-                binsList.innerHTML += `
-                    <div class="bin-card ${binCardClass}">
-                        <h2 class="bin-id">
-                            <i class="fas fa-trash-alt"></i>
-                            Bin ID: ${bin.id}
-                            ${getTypeBadge(bin.data.type)}
-                        </h2>
-                        <p class="location">
-                            <i class="fas fa-map-marker-alt"></i>
-                            ${bin.data.location || 'Location not specified'}
-                        </p>
-                        <p class="trash-level">
-                            <i class="fas fa-tachometer-alt"></i>
-                            ${bin.data.trash_level || '0'}% full
-                        </p>
-                        <a href="bin.html?id=${bin.id}" class="view-link">
-                            View details <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                `;
-            });
-            
-            updateLastFetchedTime();
-        }
+            processingInterval = setInterval(() => {
+                Object.keys(binBuffers).forEach(binId => {
+                    const buffer = binBuffers[binId];
+                    if (buffer && buffer.length > 0) {
+                        const sum = buffer.reduce((a, b) => Number(a) + Number(b), 0);
+                        const avg = Math.ceil(sum / buffer.length);
+                        
+                        // Update UI
+                        const levelEl = document.getElementById(`level-${binId}`);
+                        if (levelEl) levelEl.textContent = avg;
+                        
+                        // Update Data Model
+                        const binIndex = allBins.findIndex(b => b.id === binId);
+                        if (binIndex !== -1) allBins[binIndex].data.trash_level = avg;
 
-        // Load all bins from Firebase
-        function loadBins() {
-            db.collection("trash_bins").get().then((querySnapshot) => {
-                allBins = [];
-                
-                querySnapshot.forEach((doc) => {
-                    const bin = { id: doc.id, data: doc.data() };
-                    allBins.push(bin);
+                        binBuffers[binId] = [];
+                    }
+                });
+                updateLastFetchedTime();
+            }, 15000);
+
+            if (unsubscribeListener) unsubscribeListener();
+
+            unsubscribeListener = db.collection("trash_bins").onSnapshot((snapshot) => {
+                const loader = document.querySelector('.loading-container');
+                if (loader && !snapshot.empty) loader.style.display = 'none';
+
+                snapshot.docChanges().forEach((change) => {
+                    const binId = change.doc.id;
+                    const data = change.doc.data();
+
+                    if (change.type === "added") {
+                        allBins.push({ id: binId, data: data });
+                        // Only append to DOM if it matches current filter
+                        if (currentFilter === 'all' || (data.type && data.type.toLowerCase() === currentFilter)) {
+                            binsList.appendChild(createBinCard(binId, data));
+                        }
+                        
+                        binBuffers[binId] = [];
+                        const level = data.trash_level !== undefined ? Number(data.trash_level) : 0;
+                        binBuffers[binId].push(level);
+                    }
+                    
+                    if (change.type === "modified") {
+                        const index = allBins.findIndex(b => b.id === binId);
+                        if (index !== -1) allBins[index].data = data;
+
+                        // Buffer Value
+                        const level = data.trash_level !== undefined ? Number(data.trash_level) : 0;
+                        if (!binBuffers[binId]) binBuffers[binId] = [];
+                        binBuffers[binId].push(level);
+
+                        // Static updates
+                        const locEl = document.getElementById(`loc-${binId}`);
+                        if (locEl && data.location) locEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${data.location}`;
+                        
+                        // If type changed, re-render might be needed for class/badge,
+                        // but usually type is static. If needed, we'd replace the card.
+                    }
+                    
+                    if (change.type === "removed") {
+                        allBins = allBins.filter(b => b.id !== binId);
+                        const card = document.getElementById(`card-${binId}`);
+                        if (card) card.remove();
+                        delete binBuffers[binId];
+                    }
                 });
                 
-                // Sort bins by ID
+                // Sort on initial load or additions
                 allBins.sort((a, b) => a.id.localeCompare(b.id));
-                
-                // Apply current filter
-                if (currentFilter === 'all') {
-                    renderAllBins(allBins);
-                } else {
-                    filterBinsByType(currentFilter);
-                }
-                
-            }).catch((error) => {
+
+            }, (error) => {
                 console.error("Firebase error:", error);
-                const binsList = document.getElementById('bins-list');
-                binsList.innerHTML = `
-                    <div class="error">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>Failed to load data.</p>
-                        <button onclick="window.location.reload()">
-                            <i class="fas fa-sync-alt"></i> Retry
-                        </button>
-                    </div>
-                `;
+                binsList.innerHTML = `<div class="error"><p>Failed to load data.</p></div>`;
             });
         }
 
-        // Initialize the page
         document.addEventListener('DOMContentLoaded', () => {
-            // Load bins and setup auto-refresh
-            loadBins();
-            setInterval(loadBins, 30000);
+            setupRealtimeListener();
             
-            // Setup recycling facts
             showRandomFact();
             setInterval(showRandomFact, 30000);
             document.querySelector('.next-fact-btn').addEventListener('click', showRandomFact);
-            document.querySelector('.fun-fact-bar').addEventListener('click', function(e) {
-                if (!e.target.closest('.next-fact-btn')) {
-                    showRandomFact();
-                }
-            });
             
-            // Setup search functionality
             const searchInput = document.getElementById('search-input');
             const searchBtn = document.getElementById('search-btn');
             
-            searchInput.addEventListener('input', () => {
-                searchBins(searchInput.value);
-            });
+            searchInput.addEventListener('input', () => searchBins(searchInput.value));
+            searchBtn.addEventListener('click', () => searchBins(searchInput.value));
             
-            searchBtn.addEventListener('click', () => {
-                searchBins(searchInput.value);
-            });
-            
-            // Setup filter buttons
             document.getElementById('filter-plastic').addEventListener('click', () => filterBinsByType('plastic'));
             document.getElementById('filter-cardboard').addEventListener('click', () => filterBinsByType('cardboard'));
             document.getElementById('filter-glass').addEventListener('click', () => filterBinsByType('glass'));
             document.getElementById('clear-filters').addEventListener('click', clearFilters);
             
-            // Close search results when clicking outside
             document.addEventListener('click', (e) => {
                 const searchContainer = document.querySelector('.search-container');
                 if (!searchContainer.contains(e.target)) {
                     document.getElementById('search-results').style.display = 'none';
                 }
             });
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (unsubscribeListener) unsubscribeListener();
+            if (processingInterval) clearInterval(processingInterval);
         });
     </script>
 </body>

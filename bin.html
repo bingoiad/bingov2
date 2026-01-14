@@ -5,14 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bin Status - BinGo</title>
     
-    <!-- SDK do Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -50,22 +47,10 @@
         }
         
         /* Type-specific backgrounds */
-        body.plastic-bg {
-            background: linear-gradient(135deg, #FFF9C4 0%, #FFF3E0 100%);
-        }
-        
-        body.cardboard-bg {
-            background: linear-gradient(135deg, #E3F2FD 0%, #E1F5FE 100%);
-        }
-        
-        body.glass-bg {
-            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
-        }
-        
-        /* Default background if type not specified */
-        body.default-bg {
-            background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
-        }
+        body.plastic-bg { background: linear-gradient(135deg, #FFF9C4 0%, #FFF3E0 100%); }
+        body.cardboard-bg { background: linear-gradient(135deg, #E3F2FD 0%, #E1F5FE 100%); }
+        body.glass-bg { background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%); }
+        body.default-bg { background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%); }
         
         /* Container principal */
         .container {
@@ -74,7 +59,6 @@
             animation: fadeIn 0.5s ease-out;
         }
         
-        /* Animação de entrada suave */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -91,17 +75,9 @@
         }
         
         /* Type-specific border colors */
-        .bin-card.plastic {
-            border-left: 4px solid var(--plastic);
-        }
-        
-        .bin-card.cardboard {
-            border-left: 4px solid var(--cardboard);
-        }
-        
-        .bin-card.glass {
-            border-left: 4px solid var(--glass);
-        }
+        .bin-card.plastic { border-left: 4px solid var(--plastic); }
+        .bin-card.cardboard { border-left: 4px solid var(--cardboard); }
+        .bin-card.glass { border-left: 4px solid var(--glass); }
         
         /* Efeito hover no cartão */
         .bin-card:hover {
@@ -121,9 +97,7 @@
         }
         
         /* Ícone no título */
-        .bin-title i {
-            font-size: 1.5rem;
-        }
+        .bin-title i { font-size: 1.5rem; }
         
         /* Type badge */
         .type-badge {
@@ -137,410 +111,97 @@
             margin-left: 0.75rem;
         }
         
-        .type-plastic {
-            background-color: rgba(255, 215, 0, 0.15);
-            color: #B8860B;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-        }
-        
-        .type-cardboard {
-            background-color: rgba(33, 150, 243, 0.15);
-            color: #1565C0;
-            border: 1px solid rgba(33, 150, 243, 0.3);
-        }
-        
-        .type-glass {
-            background-color: rgba(76, 175, 80, 0.15);
-            color: #2E7D32;
-            border: 1px solid rgba(76, 175, 80, 0.3);
-        }
+        .type-plastic { background-color: rgba(255, 215, 0, 0.15); color: #B8860B; border: 1px solid rgba(255, 215, 0, 0.3); }
+        .type-cardboard { background-color: rgba(33, 150, 243, 0.15); color: #1565C0; border: 1px solid rgba(33, 150, 243, 0.3); }
+        .type-glass { background-color: rgba(76, 175, 80, 0.15); color: #2E7D32; border: 1px solid rgba(76, 175, 80, 0.3); }
         
         /* Linha de informação */
-        .info-row {
-            display: flex;
-            margin: 1.25rem 0;
-            align-items: center;
-        }
+        .info-row { display: flex; margin: 1.25rem 0; align-items: center; }
+        .info-label { font-weight: 500; color: var(--gray); min-width: 120px; display: flex; align-items: center; gap: 0.5rem; }
+        .info-value { font-weight: 500; }
         
-        /* Rótulo da informação */
-        .info-label {
-            font-weight: 500;
-            color: var(--gray);
-            min-width: 120px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        /* Valor da informação */
-        .info-value {
-            font-weight: 500;
-        }
-        
-        /* Nível do lixo - tamanho e peso */
-        .trash-level {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-left: 0.5rem;
-        }
-        
-        /* Classes para diferentes níveis de enchimento */
+        /* Nível do lixo */
+        .trash-level { font-size: 1.75rem; font-weight: 600; margin-left: 0.5rem; }
         .level-critical { color: var(--danger); }
         .level-warning { color: var(--warning); }
         .level-normal { color: var(--accent); }
         
-        /* Container da barra de progresso */
-        .progress-container {
-            width: 100%;
-            height: 10px;
-            background: #e9ecef;
-            border-radius: 5px;
-            margin-top: 0.5rem;
-            overflow: hidden;
-        }
-        
-        /* Barra de progresso em si */
-        .progress-bar {
-            height: 100%;
-            border-radius: 5px;
-            transition: width 0.5s ease, background 0.3s;
-        }
+        /* Barra de progresso */
+        .progress-container { width: 100%; height: 10px; background: #e9ecef; border-radius: 5px; margin-top: 0.5rem; overflow: hidden; }
+        .progress-bar { height: 100%; border-radius: 5px; transition: width 0.5s ease, background 0.3s; }
         
         /* Última atualização */
-        .last-updated {
-            color: var(--gray);
-            font-size: 0.85rem;
-            text-align: right;
-            margin-top: 1.5rem;
-            font-style: italic;
-        }
+        .last-updated { color: var(--gray); font-size: 0.85rem; text-align: right; margin-top: 1.5rem; font-style: italic; }
         
         /* Link de voltar */
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
+        .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+        .back-link:hover { color: var(--dark); }
         
-        /* Efeito hover no link de voltar */
-        .back-link:hover {
-            color: var(--dark);
-        }
+        /* Spinner e Erros */
+        .loading-spinner { border: 4px solid rgba(46, 125, 50, 0.1); border-radius: 50%; border-top: 4px solid var(--primary); width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 2rem auto; }
+        .error-message { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; color: var(--danger); margin-bottom: 1.5rem; }
+        .error-message button { background: var(--primary); color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 8px; margin-top: 1rem; cursor: pointer; font-family: inherit; font-weight: 500; transition: background 0.2s; }
+        .error-message button:hover { background: var(--dark); }
+
+        /* Alertas e Sugestões */
+        .full-alert { background-color: #fff8f8; border-left: 4px solid var(--danger); padding: 1.25rem; border-radius: 8px; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; animation: pulseAlert 1.5s infinite; }
+        @keyframes pulseAlert { 0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.2); } 70% { box-shadow: 0 0 0 8px rgba(211, 47, 47, 0); } 100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); } }
+        .alert-icon { font-size: 1.5rem; color: var(--danger); }
+        .alert-content { flex: 1; }
+        .alert-title { font-weight: 600; margin-bottom: 0.5rem; color: var(--danger); }
+        .alert-message { margin-bottom: 1rem; }
         
-        /* Spinner de carregamento */
-        .loading-spinner {
-            border: 4px solid rgba(46, 125, 50, 0.1);
-            border-radius: 50%;
-            border-top: 4px solid var(--primary);
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 2rem auto;
-        }
-        
-        /* Mensagem de erro */
-        .error-message {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            text-align: center;
-            color: var(--danger);
-            margin-bottom: 1.5rem;
-        }
-        
-        /* Botão na mensagem de erro */
-        .error-message button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.5rem 1.5rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        
-        /* Efeito hover no botão de erro */
-        .error-message button:hover {
-            background: var(--dark);
-        }
+        .find-bin-btn { display: inline-flex; align-items: center; gap: 0.5rem; background-color: var(--primary); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; }
+        .find-bin-btn:hover { background-color: var(--dark); transform: translateY(-2px); }
 
-        /* ESTILOS DO ALERTA DE LIXEIRA CHEIA */
-        .full-alert {
-            background-color: #fff8f8;
-            border-left: 4px solid var(--danger);
-            padding: 1.25rem;
-            border-radius: 8px;
-            margin: 1.5rem 0;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            animation: pulseAlert 1.5s infinite;
-        }
+        .suggestion-box { background-color: #f8f9fa; padding: 1.25rem; border-radius: 8px; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; }
+        .suggestion-box.plastic { border-left: 4px solid var(--plastic); background-color: rgba(255, 215, 0, 0.05); }
+        .suggestion-box.cardboard { border-left: 4px solid var(--cardboard); background-color: rgba(33, 150, 243, 0.05); }
+        .suggestion-box.glass { border-left: 4px solid var(--glass); background-color: rgba(76, 175, 80, 0.05); }
 
-        /* Animação do alerta */
-        @keyframes pulseAlert {
-            0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.2); }
-            70% { box-shadow: 0 0 0 8px rgba(211, 47, 47, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
-        }
-
-        /* Ícone do alerta */
-        .alert-icon {
-            font-size: 1.5rem;
-            color: var(--danger);
-        }
-
-        /* Conteúdo do alerta */
-        .alert-content {
-            flex: 1;
-        }
-
-        /* Título do alerta */
-        .alert-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--danger);
-        }
-
-        /* Mensagem do alerta */
-        .alert-message {
-            margin-bottom: 1rem;
-        }
-
-        /* Botão para encontrar lixeiras */
-        .find-bin-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background-color: var(--primary);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        /* Efeito hover no botão */
-        .find-bin-btn:hover {
-            background-color: var(--dark);
-            transform: translateY(-2px);
-        }
-
-        /* ESTILOS DA CAIXA DE SUGESTÕES */
-        .suggestion-box {
-            background-color: #f8f9fa;
-            padding: 1.25rem;
-            border-radius: 8px;
-            margin: 1.5rem 0;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        /* Type-specific suggestion box borders */
-        .suggestion-box.plastic {
-            border-left: 4px solid var(--plastic);
-            background-color: rgba(255, 215, 0, 0.05);
-        }
-        
-        .suggestion-box.cardboard {
-            border-left: 4px solid var(--cardboard);
-            background-color: rgba(33, 150, 243, 0.05);
-        }
-        
-        .suggestion-box.glass {
-            border-left: 4px solid var(--glass);
-            background-color: rgba(76, 175, 80, 0.05);
-        }
-
-        /* Ícone da sugestão */
-        .suggestion-icon {
-            font-size: 1.5rem;
-        }
-        
+        .suggestion-icon { font-size: 1.5rem; }
         .suggestion-box.plastic .suggestion-icon { color: var(--plastic); }
         .suggestion-box.cardboard .suggestion-icon { color: var(--cardboard); }
         .suggestion-box.glass .suggestion-icon { color: var(--glass); }
 
-        /* Conteúdo da sugestão */
-        .suggestion-content {
-            flex: 1;
-        }
-
-        /* Título da sugestão */
-        .suggestion-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        
+        .suggestion-content { flex: 1; }
+        .suggestion-title { font-weight: 600; margin-bottom: 0.5rem; }
         .suggestion-box.plastic .suggestion-title { color: var(--plastic); }
         .suggestion-box.cardboard .suggestion-title { color: var(--cardboard); }
         .suggestion-box.glass .suggestion-title { color: var(--glass); }
-
-        /* Mensagem da sugestão */
-        .suggestion-message {
-            margin-bottom: 1rem;
-        }
-
-        /* Ações da sugestão */
-        .suggestion-actions {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        /* Botão da sugestão */
-        .suggestion-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background-color: var(--primary);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        /* Efeito hover no botão de sugestão */
-        .suggestion-btn:hover {
-            background-color: var(--dark);
-            transform: translateY(-2px);
-        }
-
-        /* Botão de navegação */
-        .navigation-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background-color: var(--maps-blue);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        /* Efeito hover no botão de navegação */
-        .navigation-btn:hover {
-            background-color: #3367D6;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        /* Estilo alternativo para quando a lixeira sugerida também está cheia */
-        .alt-bin-full {
-            background-color: #fff3e0;
-            border-left: 4px solid var(--warning);
-        }
-
-        /* Ícone para lixeira alternativa cheia */
-        .alt-bin-full .suggestion-icon {
-            color: var(--warning);
-        }
-
-        /* Título para lixeira alternativa cheia */
-        .alt-bin-full .suggestion-title {
-            color: var(--warning);
-        }
-
-        /* ESTILOS PARA BOTÃO PEQUENO DE NAVEGAÇÃO */
-        .small-nav-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            background-color: var(--maps-blue);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.8rem;
-            transition: all 0.2s;
-            height: 28px;
-        }
-
-        /* Efeito hover no botão pequeno */
-        .small-nav-btn:hover {
-            background-color: #3367D6;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* Container do botão pequeno */
-        .small-nav-container {
-            margin-top: 1rem;
-            text-align: right;
-        }
+        .suggestion-message { margin-bottom: 1rem; }
+        .suggestion-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
         
-        /* Estilos responsivos para ecrãs pequenos */
+        .suggestion-btn { display: inline-flex; align-items: center; gap: 0.5rem; background-color: var(--primary); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; }
+        .suggestion-btn:hover { background-color: var(--dark); transform: translateY(-2px); }
+        
+        .navigation-btn { display: inline-flex; align-items: center; gap: 0.5rem; background-color: var(--maps-blue); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; }
+        .navigation-btn:hover { background-color: #3367D6; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+
+        .alt-bin-full { background-color: #fff3e0; border-left: 4px solid var(--warning); }
+        .alt-bin-full .suggestion-icon { color: var(--warning); }
+        .alt-bin-full .suggestion-title { color: var(--warning); }
+
+        /* Pequeno botão de navegação */
+        .small-nav-btn { display: inline-flex; align-items: center; gap: 0.25rem; background-color: var(--maps-blue); color: white; padding: 0.25rem 0.75rem; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 0.8rem; transition: all 0.2s; height: 28px; }
+        .small-nav-btn:hover { background-color: #3367D6; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .small-nav-container { margin-top: 1rem; text-align: right; }
+        
         @media (max-width: 600px) {
-            body {
-                padding: 1rem;
-            }
-            
-            .bin-card {
-                padding: 1.5rem;
-            }
-            
-            .info-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.25rem;
-                margin: 1rem 0;
-            }
-            
-            .bin-title {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .type-badge {
-                margin-left: 0;
-                margin-top: 0.5rem;
-            }
-
-            /* Adaptação dos alertas para mobile */
-            .full-alert,
-            .suggestion-box {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            /* Ajuste das ações na sugestão */
-            .suggestion-actions {
-                justify-content: center;
-                width: 100%;
-            }
-            
-            /* Botões em ecrã pequeno */
-            .suggestion-btn,
-            .navigation-btn {
-                flex: 1;
-                justify-content: center;
-            }
-
-            /* Centralizar botão de navegação pequeno */
-            .small-nav-container {
-                text-align: center;
-            }
+            body { padding: 1rem; }
+            .bin-card { padding: 1.5rem; }
+            .info-row { flex-direction: column; align-items: flex-start; gap: 0.25rem; margin: 1rem 0; }
+            .bin-title { flex-direction: column; align-items: flex-start; }
+            .type-badge { margin-left: 0; margin-top: 0.5rem; }
+            .full-alert, .suggestion-box { flex-direction: column; text-align: center; }
+            .suggestion-actions { justify-content: center; width: 100%; }
+            .suggestion-btn, .navigation-btn { flex: 1; justify-content: center; }
+            .small-nav-container { text-align: center; }
         }
     </style>
 </head>
 <body class="default-bg">
     <div class="container">
-        <!-- Cartão com os detalhes da lixeira -->
         <div id="bin-card" class="bin-card">
             <h1 class="bin-title">
                 <i class="fas fa-trash-alt"></i>
@@ -548,7 +209,6 @@
                 <span id="type-badge" class="type-badge" style="display: none;"></span>
             </h1>
             
-            <!-- Linha com o ID da lixeira -->
             <div class="info-row">
                 <span class="info-label">
                     <i class="fas fa-id-card"></i>
@@ -557,7 +217,6 @@
                 <span class="info-value" id="bin-id">-</span>
             </div>
             
-            <!-- Linha com o tipo da lixeira -->
             <div class="info-row">
                 <span class="info-label">
                     <i class="fas fa-tag"></i>
@@ -566,7 +225,6 @@
                 <span class="info-value" id="bin-type">-</span>
             </div>
             
-            <!-- Linha com a localização -->
             <div class="info-row">
                 <span class="info-label">
                     <i class="fas fa-map-marker-alt"></i>
@@ -575,7 +233,6 @@
                 <span class="info-value" id="bin-location">-</span>
             </div>
             
-            <!-- Linha com o estado (nível de enchimento) -->
             <div class="info-row">
                 <span class="info-label">
                     <i class="fas fa-tachometer-alt"></i>
@@ -589,7 +246,6 @@
                 </div>
             </div>
             
-            <!-- Linha com a última vez que foi esvaziada -->
             <div class="info-row">
                 <span class="info-label">
                     <i class="far fa-clock"></i>
@@ -598,19 +254,17 @@
                 <span class="info-value" id="bin-last-emptied">-</span>
             </div>
 
-            <!-- SECÇÃO DE ALERTA DE LIXEIRA CHEIA -->
             <div id="full-alert" style="display: none;" class="full-alert">
                 <i class="fas fa-exclamation-triangle alert-icon"></i>
                 <div class="alert-content">
                     <h3 class="alert-title">Bin Almost Full!</h3>
                     <p class="alert-message">This bin is over 75% capacity. Please consider using an alternative location.</p>
-                    <a href="index.html" class="find-bin-btn">
+                    <a href="indexv2.html" class="find-bin-btn">
                         <i class="fas fa-search-location"></i> Find Available Bins
                     </a>
                 </div>
             </div>
 
-            <!-- SECÇÃO DE SUGESTÃO DE LIXEIRA ALTERNATIVA -->
             <div id="suggestion-box" style="display: none;" class="suggestion-box">
                 <i class="fas fa-lightbulb suggestion-icon"></i>
                 <div class="suggestion-content">
@@ -627,20 +281,16 @@
                 </div>
             </div>
             
-            <!-- Última atualização -->
             <p id="last-updated" class="last-updated">-</p>
         </div>
         
-        <!-- Link para voltar ao dashboard -->
-        <a href="index.html" class="back-link">
+        <a href="indexv2.html" class="back-link">
             <i class="fas fa-arrow-left"></i>
             Back to Dashboard
         </a>
         
-        <!-- Spinner de carregamento -->
         <div id="loading" class="loading-spinner"></div>
         
-        <!-- Div para mostrar mensagens de erro -->
         <div id="error-display" class="error-message" style="display: none;"></div>
     </div>
 
@@ -673,6 +323,11 @@
         // Guardar o tipo da lixeira atual
         let currentBinType = '';
 
+        // ** STABILITY VARIABLES **
+        let readingsBuffer = [];
+        let lastKnownData = null;
+        let updateInterval = null;
+
         /**
          * Aplica o tema baseado no tipo da lixeira
          */
@@ -681,15 +336,12 @@
             const binCard = document.getElementById('bin-card');
             const typeBadge = document.getElementById('type-badge');
             
-            // Remover todas as classes de tipo do body e do cartão
             body.classList.remove('plastic-bg', 'cardboard-bg', 'glass-bg', 'default-bg');
             binCard.classList.remove('plastic', 'cardboard', 'glass');
             
-            // Remover o badge
             typeBadge.style.display = 'none';
             typeBadge.className = 'type-badge';
             
-            // Aplicar o tema baseado no tipo
             const typeLower = type ? type.toLowerCase() : '';
             
             switch(typeLower) {
@@ -720,23 +372,15 @@
             }
         }
 
-        /**
-         * Obtém todas as lixeiras do mesmo tipo
-         */
         async function getBinsOfSameType(currentBinId, binType) {
             try {
                 const allBins = await db.collection("trash_bins").get();
                 const sameTypeBins = [];
-                
                 allBins.forEach((doc) => {
                     if (doc.id !== currentBinId && doc.data().type === binType) {
-                        sameTypeBins.push({
-                            id: doc.id,
-                            data: doc.data()
-                        });
+                        sameTypeBins.push({ id: doc.id, data: doc.data() });
                     }
                 });
-                
                 return sameTypeBins;
             } catch (error) {
                 console.error("Error getting same type bins:", error);
@@ -744,110 +388,64 @@
             }
         }
 
-        /**
-         * Encontra a lixeira alternativa do mesmo tipo
-         */
         function findAlternativeSameTypeBin(currentBinId, sameTypeBins) {
-            // Ordenar por nível de enchimento (menor primeiro)
             sameTypeBins.sort((a, b) => {
                 const aLevel = a.data.trash_level || 0;
                 const bLevel = b.data.trash_level || 0;
                 return aLevel - bLevel;
             });
-            
-            // Retornar a primeira (menos cheia)
             return sameTypeBins.length > 0 ? sameTypeBins[0] : null;
         }
 
-        /**
-         * Mostra uma mensagem de erro na interface
-         */
         function showError(message) {
             document.getElementById('loading').style.display = 'none';
             const errorEl = document.getElementById('error-display');
             errorEl.style.display = 'block';
-            errorEl.innerHTML = `
-                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                <p>${message}</p>
-                <button onclick="window.location.reload()">
-                    <i class="fas fa-sync-alt"></i> Try Again
-                </button>
-            `;
+            errorEl.innerHTML = `<i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i><p>${message}</p><button onclick="window.location.reload()"><i class="fas fa-sync-alt"></i> Try Again</button>`;
         }
 
-        /**
-         * Formata uma data a partir de um timestamp do Firebase
-         */
         function formatDate(timestamp) {
             if (!timestamp) return 'Never emptied';
             const date = timestamp.toDate();
             return date.toLocaleString();
         }
 
-        /**
-         * Atualiza a barra de progresso conforme o nível de enchimento
-         */
         function updateProgressBar(level) {
             const progressBar = document.getElementById('progress-bar');
             progressBar.style.width = `${level}%`;
-            
-            // Muda a cor conforme o nível de enchimento
-            if (level > 80) {
-                progressBar.style.background = 'var(--danger)';
-            } else if (level > 50) {
-                progressBar.style.background = 'var(--warning)';
-            } else {
-                progressBar.style.background = 'var(--accent)';
-            }
+            if (level > 80) progressBar.style.background = 'var(--danger)';
+            else if (level > 50) progressBar.style.background = 'var(--warning)';
+            else progressBar.style.background = 'var(--accent)';
         }
 
-        /**
-         * Gera um link para o Google Maps com direções
-         */
         function generateMapsLink(origin, destination) {
             return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=walking`;
         }
 
-        /**
-         * Verifica o estado de uma lixeira alternativa e mostra sugestão se aplicável
-         */
         async function checkAlternativeBin(currentBinId, currentBinType, currentBinLocation) {
             try {
-                // Obter todas as lixeiras do mesmo tipo
                 const sameTypeBins = await getBinsOfSameType(currentBinId, currentBinType);
+                if (sameTypeBins.length === 0) return;
                 
-                if (sameTypeBins.length === 0) {
-                    console.log("No alternative bins of same type found");
-                    return;
-                }
-                
-                // Encontrar a melhor alternativa
                 const alternativeBin = findAlternativeSameTypeBin(currentBinId, sameTypeBins);
-                
                 if (alternativeBin) {
                     const altTrashLevel = alternativeBin.data.trash_level || 0;
                     
-                    // Elementos da interface
                     const suggestionBox = document.getElementById('suggestion-box');
                     const suggestionTitle = document.getElementById('suggestion-title');
                     const suggestionText = document.getElementById('suggestion-text');
                     const suggestionLink = document.getElementById('suggestion-link');
                     const navigationLink = document.getElementById('navigation-link');
                     
-                    // Aplicar tema à caixa de sugestões
                     suggestionBox.className = 'suggestion-box';
                     const typeClass = currentBinType ? currentBinType.toLowerCase() : '';
                     suggestionBox.classList.add(typeClass);
                     
-                    // Guardar a localização original quando vem de uma lixeira cheia
                     originalBinLocation = currentBinLocation;
-                    
-                    // Fazer reset ao estado de visualização
                     suggestionBox.classList.remove('alt-bin-full');
                     suggestionLink.style.display = 'inline-flex';
                     navigationLink.style.display = 'inline-flex';
                     
-                    // Se a lixeira alternativa também estiver cheia
                     if (altTrashLevel > 90) {
                         suggestionBox.classList.add('alt-bin-full');
                         suggestionText.textContent = `The nearest ${currentBinType} bin (${alternativeBin.id}) is also full (${altTrashLevel}% capacity).`;
@@ -855,20 +453,14 @@
                         suggestionLink.style.display = 'none';
                         navigationLink.style.display = 'none';
                     } else {
-                        // Mostrar sugestão de lixeira alternativa
                         suggestionText.textContent = `The nearest available ${currentBinType} bin is ${alternativeBin.id} (${altTrashLevel}% full).`;
                         suggestionTitle.textContent = `Alternative ${currentBinType.charAt(0).toUpperCase() + currentBinType.slice(1)} Bin Available`;
-                        suggestionLink.href = `bin.html?id=${alternativeBin.id}&fromFull=true&fromLocation=${encodeURIComponent(originalBinLocation)}`;
+                        suggestionLink.href = `binv2.html?id=${alternativeBin.id}&fromFull=true&fromLocation=${encodeURIComponent(originalBinLocation)}`;
                         
-                        // Gerar link de navegação para a lixeira alternativa
                         const altBinLocation = alternativeBin.data.location || 'Unknown location';
                         navigationLink.href = generateMapsLink(currentBinLocation, altBinLocation);
-                        
-                        // Abrir no mesmo separador em dispositivos móveis
                         navigationLink.target = /Android|iPhone|iPad/i.test(navigator.userAgent) ? '_self' : '_blank';
                     }
-                    
-                    // Mostrar a caixa de sugestões
                     suggestionBox.style.display = 'flex';
                 }
             } catch (error) {
@@ -876,134 +468,122 @@
             }
         }
 
-        /**
-         * Mostra um pequeno botão de navegação se veio de uma lixeira cheia
-         */
         function showSmallNavigationButton() {
-            // Verificar parâmetros da URL
             const urlParams = new URLSearchParams(window.location.search);
             cameFromFullBin = urlParams.get('fromFull') === 'true';
             originalBinLocation = urlParams.get('fromLocation') || '';
             
             if (cameFromFullBin && originalBinLocation) {
-                // Remover botão existente se houver
                 const existingContainer = document.querySelector('.small-nav-container');
                 if (existingContainer) existingContainer.remove();
                 
-                // Criar container para o botão pequeno
                 const smallNavContainer = document.createElement('div');
                 smallNavContainer.className = 'small-nav-container';
                 
-                // Criar o botão de navegação
                 const smallNavBtn = document.createElement('a');
                 smallNavBtn.className = 'small-nav-btn';
                 smallNavBtn.href = generateMapsLink(originalBinLocation, document.getElementById('bin-location').textContent);
                 smallNavBtn.target = /Android|iPhone|iPad/i.test(navigator.userAgent) ? '_self' : '_blank';
                 smallNavBtn.innerHTML = '<i class="fas fa-map-marked-alt"></i> Get Directions';
                 
-                // Adicionar botão ao container
                 smallNavContainer.appendChild(smallNavBtn);
-                
-                // Inserir depois do parágrafo de última atualização
                 const lastUpdated = document.getElementById('last-updated');
                 lastUpdated.parentNode.insertBefore(smallNavContainer, lastUpdated.nextSibling);
             }
         }
 
-        /**
-         * Atualiza a interface com os dados da lixeira
-         */
         function updateUI(binData) {
             const trashLevel = binData.trash_level || 0;
             currentBinType = binData.type || '';
             
-            // Aplicar tema baseado no tipo
             applyTypeTheme(currentBinType);
             
-            // Atualizar informações básicas
             document.getElementById('bin-type').textContent = currentBinType || 'Not specified';
             document.getElementById('bin-location').textContent = binData.location || 'Location not specified';
             
-            // Atualizar estado e nível
             const levelElement = document.getElementById('bin-status');
             levelElement.textContent = `${trashLevel}% full`;
             levelElement.className = 'trash-level ' +
                 (trashLevel > 80 ? 'level-critical' :
                  trashLevel > 50 ? 'level-warning' : 'level-normal');
             
-            // Atualizar barra de progresso
             updateProgressBar(trashLevel);
             
-            // Mostrar alerta se a lixeira estiver cheia
             if (trashLevel > 74) {
                 document.getElementById('full-alert').style.display = 'flex';
-                // Buscar lixeira alternativa do MESMO tipo
                 checkAlternativeBin(binId, currentBinType, binData.location || '');
             } else {
                 document.getElementById('full-alert').style.display = 'none';
                 document.getElementById('suggestion-box').style.display = 'none';
             }
             
-            // Atualizar outras informações
             document.getElementById('bin-last-emptied').textContent = formatDate(binData.last_emptied);
             document.getElementById('bin-title').textContent = `Bin Status (${trashLevel}% full)`;
             document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
             document.getElementById('loading').style.display = 'none';
             
-            // Mostrar botão de navegação pequeno se aplicável
             showSmallNavigationButton();
         }
 
-        /**
-         * Atualiza os dados da lixeira a partir do Firebase
-         */
         async function updateBinData() {
-            // Verificar se foi especificado um ID de lixeira
             if (!binId) {
                 showError('No bin specified.<br>Please visit this page with a bin ID (ex: bin.html?id=bin01)');
                 return;
             }
-
-            // Mostrar ID da lixeira e spinner de carregamento
             document.getElementById('bin-id').textContent = binId;
             document.getElementById('loading').style.display = 'block';
 
             try {
-                // Obter dados da lixeira atual
                 const currentBinDoc = await db.collection("trash_bins").doc(binId).get();
-                
-                // Verificar se a lixeira existe
                 if (!currentBinDoc.exists) {
                     showError(`Bin <strong>"${binId}"</strong> not found in database`);
                     return;
                 }
-
-                // Atualizar interface e configurar listener em tempo real
                 updateUI(currentBinDoc.data());
                 setupRealtimeListener();
-                
             } catch (error) {
                 showError(`Error loading bin data:<br>${error.message}`);
                 console.error("Firebase error:", error);
-                document.getElementById('full-alert').style.display = 'none';
-                document.getElementById('suggestion-box').style.display = 'none';
             }
         }
 
-        /**
-         * Configura um listener em tempo real para atualizações da lixeira
-         */
         function setupRealtimeListener() {
-            // Remover listener anterior se existir
-            if (unsubscribeListener) {
-                unsubscribeListener();
-            }
-            
-            // Configurar novo listener
+            if (unsubscribeListener) unsubscribeListener();
+            readingsBuffer = [];
+            if (updateInterval) clearInterval(updateInterval);
+
+            // 15s Avg Logic
+            updateInterval = setInterval(() => {
+                if (readingsBuffer.length > 0 && lastKnownData) {
+                    const sum = readingsBuffer.reduce((a, b) => Number(a) + Number(b), 0);
+                    const avg = Math.ceil(sum / readingsBuffer.length);
+                    
+                    lastKnownData.trash_level = avg;
+                    updateUI(lastKnownData);
+                    
+                    console.log(`Updated UI with average: ${avg}%`);
+                    readingsBuffer = [];
+                }
+            }, 15000);
+
             unsubscribeListener = db.collection("trash_bins").doc(binId).onSnapshot(
                 (doc) => {
                     if (doc.exists) {
-                        updateUI(doc.data());
+                        const data = doc.data();
+                        lastKnownData = data;
+                        
+                        // Buffer the reading
+                        const level = data.trash_level !== undefined ? Number(data.trash_level) : 0;
+                        readingsBuffer.push(level);
+                        console.log(`Buffered reading: ${level}`);
+                        
+                        // NOTE: We do NOT call updateUI here for trash_level changes.
+                        // We only update lastKnownData so static info (location, type) is fresh.
+                        // However, to ensure theme/static info updates immediately:
+                        if (document.getElementById('bin-type').textContent !== (data.type || 'Not specified')) {
+                             // If static info changed, we can force update
+                             updateUI(data);
+                        }
                     }
                 },
                 (error) => {
@@ -1012,23 +592,17 @@
             );
         }
 
-        // Evento antes de sair da página - remover listener
         window.addEventListener('beforeunload', function() {
-            if (unsubscribeListener) {
-                unsubscribeListener();
-            }
+            if (unsubscribeListener) unsubscribeListener();
+            if (updateInterval) clearInterval(updateInterval);
         });
 
-        // Evento quando o DOM estiver carregado - carregar dados
         document.addEventListener('DOMContentLoaded', function() {
             updateBinData();
         });
 
-        // Evento para quando a página é restaurada do cache
         window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                updateBinData();
-            }
+            if (event.persisted) updateBinData();
         });
     </script>
 </body>
