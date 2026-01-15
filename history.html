@@ -218,7 +218,7 @@
         let charts = {};
         let binTypes = {};
         
-        // NEW: Buffer logic instead of stability trackers
+        // Buffer logic for 15s averaging
         let dataBuffers = {};
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -245,8 +245,8 @@
             await loadBinInfo();
             
             // Init buffering loop
-            setInterval(collectData, 1000);
-            setInterval(processBuffers, 15000);
+            setInterval(collectData, 1000); // Collect every 1 second
+            setInterval(processBuffers, 15000); // Process every 15 seconds
             
             await loadData(24);
         }
@@ -291,7 +291,6 @@
 
         async function processBuffers() {
             const now = new Date();
-            let updatedAny = false;
             
             const binIds = Object.keys(dataBuffers);
             for (const binId of binIds) {
@@ -302,22 +301,20 @@
                     const avg = Math.ceil(sum / buffer.length);
                     
                     let history = JSON.parse(localStorage.getItem(`binHistory_${binId}`)) || [];
-                    const lastEntry = history.length > 0 ? history[history.length - 1] : null;
                     
-                    // CHANGE-ONLY LOGIC
-                    if (!lastEntry || lastEntry.level !== avg) {
-                        history.push({
-                            timestamp: now.toISOString(),
-                            level: avg
-                        });
-                        
-                        if (history.length > 1000) history = history.slice(-1000);
-                        
-                        localStorage.setItem(`binHistory_${binId}`, JSON.stringify(history));
-                        
-                        // Update specific chart immediately
-                        await updateSingleChart(binId, getSelectedTimeRange());
-                    }
+                    // ALWAYS SAVE DATA to ensure graph updates every 15 seconds
+                    history.push({
+                        timestamp: now.toISOString(),
+                        level: avg
+                    });
+                    
+                    // Keep last 1000 records
+                    if (history.length > 1000) history = history.slice(-1000);
+                    
+                    localStorage.setItem(`binHistory_${binId}`, JSON.stringify(history));
+                    
+                    // Update specific chart immediately
+                    await updateSingleChart(binId, getSelectedTimeRange());
                     
                     // Clear buffer
                     dataBuffers[binId] = [];
